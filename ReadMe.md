@@ -111,3 +111,10 @@ To run the application, follow these steps:
    http://localhost:4000/swagger/index.html
    ```
 
+6. Admin user credentials
+   ```json
+   
+   "email": "Victorbarny@gmail.com",
+   "password": "CruzzyVan007"
+
+  ```
