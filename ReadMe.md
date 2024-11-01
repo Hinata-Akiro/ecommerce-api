@@ -84,7 +84,7 @@ To run the application, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Hinata-Akiro/ecommerce-api
    cd ecommerce-api
    ```
 
@@ -98,7 +98,7 @@ To run the application, follow these steps:
    DB_CONNECTION_STRING=postgres://<username>:<password>@localhost:5432/ecommerce-api
    PORT=:4000
    JWT_SECRET=<your-secret-key>
-   SWAGGER_SERVER_URL=http://localhost:4000
+   SWAGGER_SERVER_URL=localhost:4000
    ```
 
 4. Run the application:
@@ -110,11 +110,3 @@ To run the application, follow these steps:
    ```bash
    http://localhost:4000/swagger/index.html
    ```
-
-6. Admin user credentials
-   ```json
-   
-   "email": "Victorbarny@gmail.com",
-   "password": "CruzzyVan007"
-
-  ```
