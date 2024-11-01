@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/auth/login": {
+        "/auth/login": {
             "post": {
                 "description": "Authenticates a user and returns a JWT token",
                 "consumes": [
@@ -85,7 +85,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/auth/register": {
+        "/auth/register": {
             "post": {
                 "description": "Registers a new user with email and password",
                 "consumes": [
@@ -131,7 +131,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/orders": {
+        "/orders": {
             "get": {
                 "security": [
                     {
@@ -200,10 +200,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/orders.PlaceOrderDTO"
-                            }
+                            "$ref": "#/definitions/orders.PlaceOrderDTO"
                         }
                     }
                 ],
@@ -247,7 +244,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/orders/{id}/cancel": {
+        "/orders/{id}/cancel": {
             "put": {
                 "security": [
                     {
@@ -290,77 +287,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/orders/{id}/status": {
-            "put": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Admin only: Updates the status of an order",
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Update an order status",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Order ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "New order status",
-                        "name": "status",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/orders.UpdateOrderStatusDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/utils.APIResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/models.Order"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/utils.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/products": {
+        "/products": {
             "get": {
                 "security": [
                     {
@@ -467,7 +394,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/products/{id}": {
+        "/products/{id}": {
             "get": {
                 "security": [
                     {
@@ -708,20 +635,6 @@ const docTemplate = `{
                 }
             }
         },
-        "models.OrderProduct": {
-            "type": "object",
-            "properties": {
-                "order_id": {
-                    "type": "integer"
-                },
-                "product_id": {
-                    "type": "integer"
-                },
-                "quantity": {
-                    "type": "integer"
-                }
-            }
-        },
         "models.OrderStatus": {
             "type": "string",
             "enum": [
@@ -774,19 +687,23 @@ const docTemplate = `{
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.OrderProduct"
+                        "$ref": "#/definitions/orders.ProductOrder"
                     }
                 }
             }
         },
-        "orders.UpdateOrderStatusDTO": {
+        "orders.ProductOrder": {
             "type": "object",
             "required": [
-                "status"
+                "quantity"
             ],
             "properties": {
-                "status": {
-                    "$ref": "#/definitions/models.OrderStatus"
+                "productID": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

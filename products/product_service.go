@@ -1,8 +1,9 @@
 package products
 
 import (
-	"errors"
 	"ecommerce-api/models"
+	"errors"
+
 	"gorm.io/gorm"
 )
 
@@ -17,8 +18,15 @@ func NewProductService(db *gorm.DB) *ProductService {
 }
 
 // CreateProduct creates a new product in the database
-func (s *ProductService) CreateProduct(product *CreateProduct) error {
-	return s.db.Omit("CreatedAt", "UpdatedAt").Create(product).Error
+func (s *ProductService) CreateProduct(productDTO *CreateProduct) error {
+	product := models.Product{
+		Name:        productDTO.Name,
+		Description: productDTO.Description,
+		Price:       productDTO.Price,
+		Stock:       productDTO.Stock,
+	}
+
+	return s.db.Create(&product).Error
 }
 
 // GetProduct retrieves a product by ID
@@ -36,7 +44,7 @@ func (s *ProductService) GetProduct(id string) (*models.Product, error) {
 // ListProducts retrieves all products
 func (s *ProductService) ListProducts() ([]models.Product, error) {
 	var products []models.Product
-	if err := s.db.Select("id", "name", "price").Find(&products).Error; err != nil {
+	if err := s.db.Select("id", "name", "price", "description", "stock").Find(&products).Error; err != nil {
 		return nil, errors.New("failed to retrieve products: " + err.Error())
 	}
 	return products, nil
@@ -44,13 +52,26 @@ func (s *ProductService) ListProducts() ([]models.Product, error) {
 
 // UpdateProduct updates an existing product
 func (s *ProductService) UpdateProduct(product *models.Product) error {
-	return s.db.Model(product).Updates(product).Error
+	var existingProduct models.Product
+	if err := s.db.First(&existingProduct, product.ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("product not found")
+		}
+		return err
+	}
+
+	return s.db.Model(&existingProduct).Updates(product).Error
 }
 
 // DeleteProduct deletes a product by ID
 func (s *ProductService) DeleteProduct(id string) error {
-	if err := s.db.Unscoped().Delete(&models.Product{}, "id = ?", id).Error; err != nil {
-		return errors.New("failed to delete product: " + err.Error())
+	result := s.db.Unscoped().Delete(&models.Product{}, "id = ?", id)
+	if result.Error != nil {
+		return errors.New("failed to delete product: " + result.Error.Error())
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("product not found")
 	}
 	return nil
 }

@@ -30,7 +30,7 @@ func NewProductController(productService *ProductService) *ProductController {
 // @Failure      400      {object}  utils.APIResponse
 // @Failure      500      {object}  utils.APIResponse
 // @Security     BearerAuth
-// @Router       /api/v1/products [post]
+// @Router       /products [post]
 func (c *ProductController) CreateProduct(ctx *gin.Context) {
 	var product CreateProduct
 	if err := ctx.ShouldBindJSON(&product); err != nil {
@@ -56,7 +56,7 @@ func (c *ProductController) CreateProduct(ctx *gin.Context) {
 // @Failure      404  {object}  utils.APIResponse
 // @Failure      500  {object}  utils.APIResponse
 // @Security     BearerAuth
-// @Router       /api/v1/products/{id} [get]
+// @Router       /products/{id} [get]
 func (c *ProductController) GetProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
 	product, err := c.productService.GetProduct(id)
@@ -80,7 +80,7 @@ func (c *ProductController) GetProduct(ctx *gin.Context) {
 // @Success      200  {object}  utils.APIResponse{data=[]models.Product}
 // @Failure      500  {object}  utils.APIResponse
 // @Security     BearerAuth
-// @Router       /api/v1/products [get]
+// @Router       /products [get]
 func (c *ProductController) ListProducts(ctx *gin.Context) {
 	products, err := c.productService.ListProducts()
 	if err != nil {
@@ -104,7 +104,7 @@ func (c *ProductController) ListProducts(ctx *gin.Context) {
 // @Failure      404       {object}  utils.APIResponse
 // @Failure      500       {object}  utils.APIResponse
 // @Security     BearerAuth
-// @Router       /api/v1/products/{id} [put]
+// @Router       /products/{id} [put]
 func (c *ProductController) UpdateProduct(ctx *gin.Context) {
 	idStr := ctx.Param("id")
 	idUint, err := strconv.ParseUint(idStr, 10, 64)
@@ -112,14 +112,13 @@ func (c *ProductController) UpdateProduct(ctx *gin.Context) {
 		utils.NewAPIResponse(http.StatusBadRequest, "Invalid ID", nil, err.Error()).Send(ctx)
 		return
 	}
-	var product UpdateProduct
 
+	var product UpdateProduct
 	if err := ctx.ShouldBindJSON(&product); err != nil {
 		utils.NewAPIResponse(http.StatusBadRequest, "Invalid input", nil, err.Error()).Send(ctx)
 		return
 	}
 
-	// Create a new models.Product instance
 	var updatedProduct models.Product
 	updatedProduct.ID = uint(idUint)
 
@@ -136,13 +135,19 @@ func (c *ProductController) UpdateProduct(ctx *gin.Context) {
 		updatedProduct.Stock = *product.Stock
 	}
 
-	if err := c.productService.UpdateProduct(&updatedProduct); err != nil {
-		utils.NewAPIResponse(http.StatusInternalServerError, "Failed to update product", nil, err.Error()).Send(ctx)
+	err = c.productService.UpdateProduct(&updatedProduct)
+	if err != nil {
+		if err.Error() == "product not found" {
+			utils.NewAPIResponse(http.StatusNotFound, "Product not found", nil, "").Send(ctx)
+		} else {
+			utils.NewAPIResponse(http.StatusInternalServerError, "Failed to update product", nil, err.Error()).Send(ctx)
+		}
 		return
 	}
 
 	utils.NewAPIResponse(http.StatusOK, "Product updated successfully", updatedProduct, "").Send(ctx)
 }
+
 
 // DeleteProduct godoc
 // @Summary      Delete a product
@@ -154,7 +159,7 @@ func (c *ProductController) UpdateProduct(ctx *gin.Context) {
 // @Failure      404  {object}  utils.APIResponse
 // @Failure      500  {object}  utils.APIResponse
 // @Security     BearerAuth
-// @Router       /api/v1/products/{id} [delete]
+// @Router       /products/{id} [delete]
 func (c *ProductController) DeleteProduct(ctx *gin.Context) {
 	id := ctx.Param("id")
 	if err := c.productService.DeleteProduct(id); err != nil {

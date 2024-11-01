@@ -30,7 +30,7 @@ func NewAuthController(authService *AuthService) *AuthController {
 // @Success      200    {object}  utils.APIResponse
 // @Failure      400    {object}  utils.APIResponse
 // @Failure      500    {object}  utils.APIResponse
-// @Router       /api/v1/auth/register [post]
+// @Router       /auth/register [post]
 func (c *AuthController) Register(ctx *gin.Context) {
 	var user RegisterDTO
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -63,7 +63,7 @@ func (c *AuthController) Register(ctx *gin.Context) {
 // @Failure      401    {object}  utils.APIResponse
 // @Failure      404    {object}  utils.APIResponse
 // @Failure      500    {object}  utils.APIResponse
-// @Router       /api/auth/login [post]
+// @Router       /auth/login [post]
 func (c *AuthController) Login(ctx *gin.Context) {
 	var input LoginDTO
 

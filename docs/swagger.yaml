@@ -42,15 +42,6 @@ definitions:
       user_id:
         type: integer
     type: object
-  models.OrderProduct:
-    properties:
-      order_id:
-        type: integer
-      product_id:
-        type: integer
-      quantity:
-        type: integer
-    type: object
   models.OrderStatus:
     enum:
     - pending
@@ -88,15 +79,18 @@ definitions:
     properties:
       products:
         items:
-          $ref: '#/definitions/models.OrderProduct'
+          $ref: '#/definitions/orders.ProductOrder'
         type: array
     type: object
-  orders.UpdateOrderStatusDTO:
+  orders.ProductOrder:
     properties:
-      status:
-        $ref: '#/definitions/models.OrderStatus'
+      productID:
+        type: integer
+      quantity:
+        minimum: 1
+        type: integer
     required:
-    - status
+    - quantity
     type: object
   products.CreateProduct:
     properties:
@@ -141,7 +135,7 @@ info:
   description: Your API description.
   version: "1.0"
 paths:
-  /api/auth/login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -184,7 +178,7 @@ paths:
       summary: Login a user
       tags:
       - auth
-  /api/v1/auth/register:
+  /auth/register:
     post:
       consumes:
       - application/json
@@ -214,7 +208,7 @@ paths:
       summary: Register a new user
       tags:
       - auth
-  /api/v1/orders:
+  /orders:
     get:
       description: Allows a user to view their orders
       produces:
@@ -250,9 +244,7 @@ paths:
         name: products
         required: true
         schema:
-          items:
-            $ref: '#/definitions/orders.PlaceOrderDTO'
-          type: array
+          $ref: '#/definitions/orders.PlaceOrderDTO'
       produces:
       - application/json
       responses:
@@ -282,7 +274,7 @@ paths:
       summary: Place an order
       tags:
       - orders
-  /api/v1/orders/{id}/cancel:
+  /orders/{id}/cancel:
     put:
       description: Allows a user to cancel a pending order
       parameters:
@@ -309,49 +301,7 @@ paths:
       summary: Cancel an order
       tags:
       - orders
-  /api/v1/orders/{id}/status:
-    put:
-      description: 'Admin only: Updates the status of an order'
-      parameters:
-      - description: Order ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: New order status
-        in: body
-        name: status
-        required: true
-        schema:
-          $ref: '#/definitions/orders.UpdateOrderStatusDTO'
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/utils.APIResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/models.Order'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.APIResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.APIResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.APIResponse'
-      security:
-      - BearerAuth: []
-      summary: Update an order status
-      tags:
-      - orders
-  /api/v1/products:
+  /products:
     get:
       description: Retrieve all products
       produces:
@@ -413,7 +363,7 @@ paths:
       summary: Create a new product
       tags:
       - products
-  /api/v1/products/{id}:
+  /products/{id}:
     delete:
       description: 'Admin only: Delete a product by ID'
       parameters:

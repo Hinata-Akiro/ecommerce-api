@@ -1,6 +1,9 @@
 package models
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type OrderStatus string
 
@@ -26,4 +29,13 @@ type OrderProduct struct {
 	OrderID   uint `json:"order_id"`
 	ProductID uint `json:"product_id"`
 	Quantity  int  `json:"quantity"`
+}
+
+
+func (status OrderStatus) IsValid() error {
+	switch status {
+	case OrderStatusPending, OrderStatusProcessing, OrderStatusShipped, OrderStatusDelivered, OrderStatusCancelled:
+		return nil
+	}
+	return errors.New("invalid order status")
 }

@@ -25,8 +25,14 @@ type Server struct {
 }
 
 func NewServer() (*Server, error) {
-	if _, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		// Custom validation setup
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("orderStatus", func(fl validator.FieldLevel) bool {
+			status, ok := fl.Field().Interface().(models.OrderStatus)
+			if !ok {
+				return false
+			}
+			return status.IsValid() == nil
+		})
 	}
 
 	err := database.Connect()
@@ -55,7 +61,7 @@ func (server *Server) setupRouter() {
     docs.SwaggerInfo.Host = appConfig.SWAGGER_SERVER_URL
 
 	// Swagger setup
-	url := ginSwagger.URL(appConfig.SWAGGER_SERVER_URL + "/swagger/doc.json")
+	url := ginSwagger.URL( "http://" + appConfig.SWAGGER_SERVER_URL + "/swagger/doc.json")
     router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	// API routes

@@ -33,20 +33,27 @@ func NewAuthService(jwtSecret string, db *gorm.DB) *AuthService {
 // The function then uses a database transaction to ensure atomicity. It creates a new user record
 // in the database using the provided User struct. If the creation process fails, it returns an error
 // with a descriptive message. If the creation is successful, it returns nil.
-func (s *AuthService) Register(user *RegisterDTO) error {
-	hashedPassword, err := utils.HashPassword(user.Password)
+func (s *AuthService) Register(userDTO *RegisterDTO) error {
+	hashedPassword, err := utils.HashPassword(userDTO.Password)
 	if err != nil {
 		return err
 	}
-	user.Password = hashedPassword
+
+	user := models.User{
+		Email:    userDTO.Email,
+		Name:     userDTO.Name,
+		Password: hashedPassword,
+		IsAdmin:  false, 
+	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(user).Error; err != nil {
+		if err := tx.Create(&user).Error; err != nil {
 			return errors.New("failed to create user: " + err.Error())
 		}
 		return nil
 	})
 }
+
 
 
 // Login attempts to authenticate a user with the provided email and password.
@@ -74,7 +81,7 @@ func (s *AuthService) Login(email, password string) (string, error) {
 
 	// Check if the provided password matches the stored hashed password
 	if err := utils.ComparePasswords(password, user.Password); err != nil {
-		return "", errors.New("invalid credentials")
+		return "", utils.ErrInvalidCredentials
 	}
 
 	// Generate JWT token using the user's ID as the subject
