@@ -182,7 +182,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Registers a new user with email and password
+      description: Registers a new user with email and password, with optional admin
+        privileges
       parameters:
       - description: User registration details
         in: body
@@ -190,6 +191,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/auth.RegisterDTO'
+      - description: Set to true to register user as admin
+        in: query
+        name: admin
+        type: boolean
       produces:
       - application/json
       responses:

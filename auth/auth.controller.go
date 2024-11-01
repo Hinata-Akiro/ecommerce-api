@@ -22,34 +22,37 @@ func NewAuthController(authService *AuthService) *AuthController {
 
 // Register godoc
 // @Summary      Register a new user
-// @Description  Registers a new user with email and password
+// @Description  Registers a new user with email and password, with optional admin privileges
 // @Tags         auth
 // @Accept       json
 // @Produce      json
 // @Param        input  body      RegisterDTO   true  "User registration details"
+// @Param        admin  query     bool          false "Set to true to register user as admin"
 // @Success      200    {object}  utils.APIResponse
 // @Failure      400    {object}  utils.APIResponse
 // @Failure      500    {object}  utils.APIResponse
 // @Router       /auth/register [post]
 func (c *AuthController) Register(ctx *gin.Context) {
-	var user RegisterDTO
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	var userDTO RegisterDTO
+
+	if err := ctx.ShouldBindJSON(&userDTO); err != nil {
 		utils.NewAPIResponse(http.StatusBadRequest, "Invalid input", nil, err.Error()).Send(ctx)
 		return
 	}
 
-	if err := validate.Struct(&user); err != nil {
-		utils.NewAPIResponse(http.StatusBadRequest, "Validation failed", nil, err.Error()).Send(ctx)
-		return
+	isAdmin := false
+	if adminQuery := ctx.Query("admin"); adminQuery == "true" {
+		isAdmin = true
 	}
 
-	if err := c.authService.Register(&user); err != nil {
+	if err := c.authService.Register(&userDTO, isAdmin); err != nil {
 		utils.NewAPIResponse(http.StatusInternalServerError, "Failed to register user", nil, err.Error()).Send(ctx)
 		return
 	}
 
 	utils.NewAPIResponse(http.StatusOK, "User registered successfully", nil, "").Send(ctx)
 }
+
 
 // Login godoc
 // @Summary      Login a user

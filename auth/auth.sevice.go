@@ -33,7 +33,7 @@ func NewAuthService(jwtSecret string, db *gorm.DB) *AuthService {
 // The function then uses a database transaction to ensure atomicity. It creates a new user record
 // in the database using the provided User struct. If the creation process fails, it returns an error
 // with a descriptive message. If the creation is successful, it returns nil.
-func (s *AuthService) Register(userDTO *RegisterDTO) error {
+func (s *AuthService) Register(userDTO *RegisterDTO, isAdmin bool) error {
 	hashedPassword, err := utils.HashPassword(userDTO.Password)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (s *AuthService) Register(userDTO *RegisterDTO) error {
 		Email:    userDTO.Email,
 		Name:     userDTO.Name,
 		Password: hashedPassword,
-		IsAdmin:  false, 
+		IsAdmin:  isAdmin,
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
@@ -53,6 +53,7 @@ func (s *AuthService) Register(userDTO *RegisterDTO) error {
 		return nil
 	})
 }
+
 
 
 
