@@ -15,6 +15,8 @@ The project is organized into the following directories:
 * `middleware`: Contains middleware functions for authentication and authorization.
 * `models`: Contains data models for the application.
 * `products`: Contains product-related business logic and endpoints.
+* `orders`: Contains order-related business logic and endpoints.
+* `auth`: Contains authentication logic for the application
 * `routes`: Contains route definitions for the API.
 * `services`: Contains business service logic for products, orders, and users.
 * `utils`: Contains utility functions and helpers for the application.
@@ -24,8 +26,8 @@ The project is organized into the following directories:
 The API provides the following endpoints:
 
 ### Authentication
-* **`POST /api/auth/register`**: Registers a new user.
-* **`POST /api/auth/login`**: Logs in a user and returns a JWT token.
+* **`POST /api/v1/auth/register`**: Registers a new user.
+* **`POST /api/v1/auth/login`**: Logs in a user and returns a JWT token.
 
 ### Product Management
 * **`GET /api/v1/products`**: Retrieves a list of all products (publicly accessible).
