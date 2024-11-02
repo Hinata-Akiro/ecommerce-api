@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"ecommerce-api/models"
 	"ecommerce-api/utils"
+	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,24 +35,45 @@ func NewAuthController(authService *AuthService) *AuthController {
 // @Failure      500    {object}  utils.APIResponse
 // @Router       /auth/register [post]
 func (c *AuthController) Register(ctx *gin.Context) {
-	var userDTO RegisterDTO
+    var userDTO RegisterDTO
 
-	if err := ctx.ShouldBindJSON(&userDTO); err != nil {
+    if err := ctx.ShouldBindJSON(&userDTO); err != nil {
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			errors := make(map[string]string)
+			for _, v := range validationErrors {
+				field := v.Field()
+				if field == "Password" {
+					_, errorMessage := models.ValidatePassword(userDTO.Password)
+					errors["password"] = errorMessage
+				} else {
+					errors[field] = v.Error() 
+				}
+			}
+			jsonErrors, _ := json.Marshal(errors)
+			utils.NewAPIResponse(http.StatusBadRequest, "Validation error", nil, string(jsonErrors)).Send(ctx)
+			return
+		}
 		utils.NewAPIResponse(http.StatusBadRequest, "Invalid input", nil, err.Error()).Send(ctx)
 		return
 	}
 
-	isAdmin := false
-	if adminQuery := ctx.Query("admin"); adminQuery == "true" {
-		isAdmin = true
-	}
+    isAdmin := false
+    if adminQuery := ctx.Query("admin"); adminQuery == "true" {
+        isAdmin = true
+    }
 
-	if err := c.authService.Register(&userDTO, isAdmin); err != nil {
-		utils.NewAPIResponse(http.StatusInternalServerError, "Failed to register user", nil, err.Error()).Send(ctx)
-		return
-	}
+    // Register the user using the auth service
+    if err := c.authService.Register(&userDTO, isAdmin); err != nil {
+        if err == utils.ErrUserExists {
+            utils.NewAPIResponse(http.StatusBadRequest, "User with email already exists", nil, err.Error()).Send(ctx)
+        } else {
+            utils.NewAPIResponse(http.StatusInternalServerError, "Failed to register user", nil, err.Error()).Send(ctx)
+        }
+        return
+    }
 
-	utils.NewAPIResponse(http.StatusOK, "User registered successfully", nil, "").Send(ctx)
+    // Success response
+    utils.NewAPIResponse(http.StatusOK, "User registered successfully", nil, "").Send(ctx)
 }
 
 

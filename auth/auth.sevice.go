@@ -39,6 +39,12 @@ func (s *AuthService) Register(userDTO *RegisterDTO, isAdmin bool) error {
 		return err
 	}
 
+	var existingUser models.User
+    if err := s.db.Where("email = ?", userDTO.Email).First(&existingUser).Error; err == nil {
+        return utils.ErrUserExists
+    }
+
+
 	user := models.User{
 		Email:    userDTO.Email,
 		Name:     userDTO.Name,

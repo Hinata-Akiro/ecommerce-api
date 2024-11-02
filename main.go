@@ -33,6 +33,8 @@ func NewServer() (*Server, error) {
 			}
 			return status.IsValid() == nil
 		})
+
+		v.RegisterValidation("password", models.PasswordValidation)
 	}
 
 	err := database.Connect()

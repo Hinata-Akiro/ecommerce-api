@@ -9,6 +9,7 @@ import (
 var (
 	ErrUnAuthorized       = errors.New("Unauthorized")
 	ErrUserNotFound       = errors.New("user not found")
+	ErrUserExists         = errors.New("user with email already exists")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 )
 
