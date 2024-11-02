@@ -5,7 +5,7 @@ import (
 )
 
 type ProductOrder struct {
-	ProductID uint `json:"productID"`
+	ProductID uint `json:"productID" binding:"required,gt=0"` 
 	Quantity  int  `json:"quantity" binding:"required,gte=1"`
 }
 

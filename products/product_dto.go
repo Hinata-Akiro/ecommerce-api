@@ -1,10 +1,10 @@
 package products
 
 type CreateProduct struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description" binding:"required"`
-	Price       int64  `json:"price" binding:"required"`
-	Stock       int    `json:"stock" binding:"required"`
+	Name        string `json:"name" binding:"required,min=1"`         
+	Description string `json:"description" binding:"required,min=1"` 
+	Price       int64  `json:"price" binding:"required,gt=0"`         
+	Stock       int    `json:"stock" binding:"required,gt=0"`         
 }
 
 type UpdateProduct struct {
